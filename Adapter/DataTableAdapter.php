@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Xaben\DataFilterDataTables\Adapter;
 
-use Xaben\DataFilter\Adapter\AdapterInterface;
+use Xaben\DataFilter\Adapter\Adapter;
 use Xaben\DataFilter\Adapter\BaseAdapter;
-use Xaben\DataFilter\Definition\FilterDefinitionInterface;
+use Xaben\DataFilter\Definition\FilterDefinition;
 use Xaben\DataFilter\Filter\CollectionFilter;
 use Xaben\DataFilter\Pagination\PaginationConfiguration;
-use Symfony\Component\HttpFoundation\Request;
 
-class DataTableAdapter extends BaseAdapter implements AdapterInterface
+class DataTableAdapter extends BaseAdapter implements Adapter
 {
     protected function processPagination(
-        FilterDefinitionInterface $definition,
-        Request $request,
+        FilterDefinition $definition,
+        array $requestParameters,
         CollectionFilter $collectionFilter
     ): void {
         $paginationConfiguration = $definition->getPaginationConfiguration();
@@ -24,8 +23,8 @@ class DataTableAdapter extends BaseAdapter implements AdapterInterface
         }
 
         [$offset, $limit] = $paginationConfiguration->getByOffset(
-            (int) $request->request->get('start', '0'),
-            (int) $request->request->get('length', (string) PaginationConfiguration::DEFAULT_RESULT_COUNT)
+            (int) $requestParameters['start'] ?? 0,
+            (int) $requestParameters['length'] ?? PaginationConfiguration::DEFAULT_RESULT_COUNT
         );
 
         $collectionFilter->setOffset($offset);
@@ -33,13 +32,13 @@ class DataTableAdapter extends BaseAdapter implements AdapterInterface
     }
 
     protected function processSortable(
-        FilterDefinitionInterface $definition,
-        Request $request,
+        FilterDefinition $definition,
+        array $requestParameters,
         CollectionFilter $collectionFilter
     ): void {
         $sortConfiguration = $definition->getSortConfiguration();
         $sort = [];
-        foreach ($request->request->all()['order'] ?? [] as $value) {
+        foreach ($requestParameters['order'] ?? [] as $value) {
             $columnIndex = (int) ($value['column'] ?? -1);
             $sortDefinition = $sortConfiguration->getSortDefinitionByIndex($columnIndex);
             if ($sortDefinition) {
@@ -57,28 +56,21 @@ class DataTableAdapter extends BaseAdapter implements AdapterInterface
     }
 
     protected function processFilters(
-        FilterDefinitionInterface $definition,
-        Request $request,
+        FilterDefinition $definition,
+        array $requestParameters,
         CollectionFilter $collectionFilter
     ): void {
         $filterConfiguration = $definition->getFilterConfiguration();
         $criteria = [];
-        foreach ($request->request->all()['columns'] ?? [] as $columnIndex => $column) {
+        foreach ($requestParameters['columns'] ?? [] as $columnIndex => $column) {
             $filter = $filterConfiguration->getFilterByIndex($columnIndex);
             if ($filter && $column['searchable'] === 'true' && ($column['search']['value'] ?? '') !== '') {
                 $criteria = array_merge($criteria, $filter->getFilter($column['search']['value']));
             }
         }
 
-        $predefinedFilters = $definition->getPredefinedFilterConfiguration($request)->getAllFilters();
-        $collectionFilter->setCriteria(
-            array_merge(
-                $definition->getDefaultFilterConfiguration($request)->getAllFilters(),
-                $criteria,
-                $predefinedFilters
-            )
-        );
-
-        $collectionFilter->setPredefinedCriteria($predefinedFilters);
+        $collectionFilter->setDefaultCriteria($definition->getDefaultFilterConfiguration($requestParameters)->getAllFilters());
+        $collectionFilter->setUserCriteria($criteria);
+        $collectionFilter->setPredefinedCriteria($definition->getPredefinedFilterConfiguration($requestParameters)->getAllFilters());
     }
 }
