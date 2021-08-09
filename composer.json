@@ -1,16 +1,19 @@
 {
     "name": "xaben/datafilter-datatables",
-    "description": "A library that provides common interface for filtering data",
+    "description": "A library that provides backend filtering integration for DataTables",
     "type": "library",
     "license": "MIT",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
         "php": ">=8.0",
         "xaben/datafilter": "*"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
     "autoload": {
         "psr-4": {
-            "Xaben\\DataFilterDataTables\\": ""
+            "Xaben\\DataFilterDataTables\\": "src/"
         }
     }
 }

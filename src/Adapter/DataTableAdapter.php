@@ -23,8 +23,8 @@ class DataTableAdapter extends BaseAdapter implements Adapter
         }
 
         [$offset, $limit] = $paginationConfiguration->getByOffset(
-            (int) $requestParameters['start'] ?? 0,
-            (int) $requestParameters['length'] ?? PaginationConfiguration::DEFAULT_RESULT_COUNT
+            (int) ($requestParameters['start'] ?? 0),
+            (int) ($requestParameters['length'] ?? PaginationConfiguration::DEFAULT_RESULT_COUNT)
         );
 
         $collectionFilter->setOffset($offset);
