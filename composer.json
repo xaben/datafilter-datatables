@@ -1,0 +1,16 @@
+{
+    "name": "xaben/datafilter-datatables",
+    "description": "A library that provides common interface for filtering data",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.0",
+        "xaben/datafilter": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Xaben\\DataFilterDataTables\\": ""
+        }
+    }
+}
