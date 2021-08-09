@@ -40,7 +40,7 @@ class DataTableAdapter extends BaseAdapter implements Adapter
         $sort = [];
         foreach ($requestParameters['order'] ?? [] as $value) {
             $columnIndex = (int) ($value['column'] ?? -1);
-            $sortDefinition = $sortConfiguration->getSortDefinitionByIndex($columnIndex);
+            $sortDefinition = $sortConfiguration->getSortDefinition($columnIndex);
             if ($sortDefinition) {
                 $sort = array_merge($sort, $sortDefinition->getSortOrder($value['dir']));
             }
@@ -63,14 +63,14 @@ class DataTableAdapter extends BaseAdapter implements Adapter
         $filterConfiguration = $definition->getFilterConfiguration();
         $criteria = [];
         foreach ($requestParameters['columns'] ?? [] as $columnIndex => $column) {
-            $filter = $filterConfiguration->getFilterByIndex($columnIndex);
+            $filter = $filterConfiguration->getFilter($columnIndex);
             if ($filter && $column['searchable'] === 'true' && ($column['search']['value'] ?? '') !== '') {
                 $criteria = array_merge($criteria, $filter->getFilter($column['search']['value']));
             }
         }
 
-        $collectionFilter->setDefaultCriteria($definition->getDefaultFilterConfiguration($requestParameters)->getAllFilters());
+        $collectionFilter->setDefaultCriteria($definition->getDefaultFilterConfiguration($requestParameters)->getCriteria());
         $collectionFilter->setUserCriteria($criteria);
-        $collectionFilter->setPredefinedCriteria($definition->getPredefinedFilterConfiguration($requestParameters)->getAllFilters());
+        $collectionFilter->setPredefinedCriteria($definition->getPredefinedFilterConfiguration($requestParameters)->getCriteria());
     }
 }
